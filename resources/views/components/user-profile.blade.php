@@ -16,10 +16,15 @@
       @component('components.file-uploader',['upload_type'=>'profile'])
       @endcomponent
     </div>
+   <div>
+     <button class="btn btn-xs btn-success pull-right" role="button" id="btnBlockChain"><i class="material-icons">print</i>Send To BlockChain</button>
+   </div>
     @endif
   </div>
   <div class="col-md-10" id="main-container">
-    <h3>{{$user->name}} <span class="label label-danger">{{ucfirst($user->role)}}</span> <span class="label label-primary">{{ucfirst($user->gender)}}</span>
+    <div id="stname"><h3>{{$user->name}}</h3></div>
+      <h3>
+      <span class="label label-danger">{{ucfirst($user->role)}}</span> <span class="label label-primary">{{ucfirst($user->gender)}}</span>
       @if ($user->role == 'teacher' && $user->section_id > 0)
         <small>Class Teacher of Section: <span class="label label-info">{{ucfirst($user->section->section_number)}}</span></small>
       @endif
@@ -178,6 +183,16 @@
             // academicPart.appendChild(resultTable);
             printWindow.print();
           });
+
+        $("#btnBlockChain").on("click", function () {
+            var x;
+            if (confirm("Are you sure?") === true) {
+                 setvalue();
+            } else {
+                x = "You pressed Cancel!";
+                alert(x);
+            }
+        });
         </script>
       @endif
      </h3>
@@ -187,12 +202,12 @@
         <tr>
           @if($user->role == "student")
           <td><b>Code:</b></td>
-          <td>{{$user->student_code}}</td>
+          <td id="stdId">{{$user->student_code}}</td>
           <td><b>Session:</b></td>
           <td>{{$user->studentInfo['session']}}</td>
           @else
           <td><b>Code:</b></td>
-          <td>{{$user->student_code}}</td>
+          <td id="stdIdx">{{$user->student_code}}</td>
           <td><b>About:</b></td>
           <td>{{$user->about}}</td>
           @endif
@@ -278,3 +293,173 @@
     </div>
   </div>
 </div>
+<script>
+    window.onload = function () {
+// check to see if user has metamask addon installed on his browser. check to make sure web3 is defined
+        if (typeof web3 === 'undefined') {
+            document.getElementById('metamask').innerHTML = 'You need <a href="https://metamask.io/">MetaMask</a> browser plugin to run this example'
+        }
+// call the getvalue function here
+        //   setvalue();
+       // getvalue();
+    }
+
+    // function to add student diploma letter to the blockchain
+    function setvalue() {
+
+        var abi = [
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_sId",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "_fName",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_lName",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_schoolName",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_country",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_sdescription",
+                        "type": "string"
+                    }
+                ],
+                "name": "setStudent",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "countStudents",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    }
+                ],
+                "name": "getStudent",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getStudent",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address[]"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "studentAccts",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ]
+
+        //contract address
+        var contractaddress = '0xfc9263ec5e8fac93673b19eec4df5d6524752197';
+        //instantiate and connect to contract address via Abi
+
+        var myAbi = web3.eth.contract(abi);
+        var myfunction = myAbi.at(contractaddress);
+        //call the set function of our Diploma contract
+
+        var studId = document.getElementById('stdId').innerText;
+        var data = web3.sha3(studId);
+
+        console.log(data);
+
+        var stdId = data;
+        var str = document.getElementById('stname').innerText;
+        const arr = str.split(/ (.*)/);
+        var fiName = arr[0];
+        var lName = arr[1];
+        var lSchool = "College Mont Morency";
+        var lCountry = "Canada";
+        var lDescription = "To Whom It May Concern, I certified the diploma is correct. Mr Bick Dad the Dean";
+
+        myfunction.setStudent(stdId, stdId, fiName, lName, lSchool, lCountry, lDescription, (err, res) => {
+            console.log("this is my result", res);
+        });
+
+    }
+
+</script>

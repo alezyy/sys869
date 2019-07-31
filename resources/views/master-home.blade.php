@@ -10,6 +10,9 @@
                 <div class="panel-body">
                     <a class="btn btn-danger btn-lg btn-block" href="{{url('create-school')}}" role="button">Manage Schools</a>
                 </div>
+                <div class="panel-body">
+                    <a class="btn btn-danger btn-lg btn-block" href="{{url('create-ethereum')}}" role="button">Manage Ethereum</a>
+                </div>
             </div>
         </div>
     </div>
